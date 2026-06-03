@@ -106,10 +106,13 @@ def setup_working_directory():
     # Configure git for deploy_redesign.py
     github_token = os.getenv("GITHUB_TOKEN")
     if github_token:
-        subprocess.run(["git", "config", "--global", "credential.helper", "store"], capture_output=True)
-        cred_path = os.path.expanduser("~/.git-credentials")
-        with open(cred_path, "w") as f:
-            f.write(f"https://{github_token}@github.com\n")
+        subprocess.run(["git", "config", "--global", "credential.helper", "cache --timeout=3600"], capture_output=True)
+        subprocess.run(
+            ["git", "credential", "approve"],
+            input=f"protocol=https\nhost=github.com\nusername=x-access-token\npassword={github_token}\n\n",
+            text=True,
+            capture_output=True,
+        )
         subprocess.run(["git", "config", "--global", "user.email", "bot@florianrolke.com"], capture_output=True)
         subprocess.run(["git", "config", "--global", "user.name", "LeadMagnet Bot"], capture_output=True)
 

@@ -73,17 +73,14 @@ def ensure_repo_cloned():
     # Clone fresh
     os.makedirs(os.path.dirname(repo_path), exist_ok=True)
 
-    github_token = os.getenv("GITHUB_TOKEN")
-    if github_token:
-        # Token-based clone (Modal / CI environments)
+    # Use gh CLI or configured git credentials. Never put tokens in clone URLs.
+    result = subprocess.run(
+        ["gh", "repo", "clone", GITHUB_REPO, repo_path],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
         result = subprocess.run(
-            ["git", "clone", f"https://{github_token}@github.com/{GITHUB_REPO}.git", repo_path],
-            capture_output=True, text=True
-        )
-    else:
-        # gh CLI clone (local dev)
-        result = subprocess.run(
-            ["gh", "repo", "clone", GITHUB_REPO, repo_path],
+            ["git", "clone", f"https://github.com/{GITHUB_REPO}.git", repo_path],
             capture_output=True, text=True
         )
     if result.returncode != 0:
